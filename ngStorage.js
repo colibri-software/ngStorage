@@ -54,6 +54,21 @@
                             }
 
                             return $storage.$default(items);
+                        },
+                        $force: function() {
+                            if (!angular.equals($storage, _last$storage)) {
+                                angular.forEach($storage, function(v, k) {
+                                    angular.isDefined(v) && '$' !== k[0] && webStorage.setItem('ngStorage-' + k, angular.toJson(v));
+
+                                    delete _last$storage[k];
+                                });
+
+                                for (var k in _last$storage) {
+                                    webStorage.removeItem('ngStorage-' + k);
+                                }
+
+                                _last$storage = angular.copy($storage);
+                            }
                         }
                     },
                     _last$storage,
@@ -66,23 +81,11 @@
 
                 _last$storage = angular.copy($storage);
 
-                $rootScope.$watch(function() {
+                $rootScope.$new().$watch(function() {
                     _debounce || (_debounce = setTimeout(function() {
                         _debounce = null;
 
-                        if (!angular.equals($storage, _last$storage)) {
-                            angular.forEach($storage, function(v, k) {
-                                angular.isDefined(v) && '$' !== k[0] && webStorage.setItem('ngStorage-' + k, angular.toJson(v));
-
-                                delete _last$storage[k];
-                            });
-
-                            for (var k in _last$storage) {
-                                webStorage.removeItem('ngStorage-' + k);
-                            }
-
-                            _last$storage = angular.copy($storage);
-                        }
+                        $storage.$force();
                     }, 100));
                 });
 
