@@ -10,4 +10,5 @@ describe('ngStorage', function () {
     ){
         expect($localStorage).not.to.equal(null);
     }));
+    
 });

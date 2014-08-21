@@ -55,12 +55,15 @@
 
                             return $storage.$default(items);
                         },
-                        $force: function() {
-                            if (!angular.equals($storage, _last$storage)) {
+                        $force: function(onlyKey) {
+                          if (!angular.equals($storage, _last$storage)) {
                                 angular.forEach($storage, function(v, k) {
-                                    angular.isDefined(v) && '$' !== k[0] && webStorage.setItem('ngStorage-' + k, angular.toJson(v));
+                                    if(onlyKey == null || onlyKey == k)
+                                    {
+                                        angular.isDefined(v) && '$' !== k[0] && webStorage.setItem('ngStorage-' + k, angular.toJson(v));
 
-                                    delete _last$storage[k];
+                                        delete _last$storage[k];
+                                    }
                                 });
 
                                 for (var k in _last$storage) {
