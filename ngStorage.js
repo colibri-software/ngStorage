@@ -56,21 +56,36 @@
                             return $storage.$default(items);
                         },
                         $force: function(onlyKey) {
-                          if (!angular.equals($storage, _last$storage)) {
-                                angular.forEach($storage, function(v, k) {
-                                    if(onlyKey == null || onlyKey == k)
-                                    {
-                                        angular.isDefined(v) && '$' !== k[0] && webStorage.setItem('ngStorage-' + k, angular.toJson(v));
-
-                                        delete _last$storage[k];
-                                    }
-                                });
-
-                                for (var k in _last$storage) {
-                                    webStorage.removeItem('ngStorage-' + k);
+                            var changed = false; 
+                            var singleItem = (onlyKey != null)
+                            if(!singleItem) {
+                              changed = !angular.equals($storage, _last$storage)
+                            }
+                            else {
+                              changed = !angular.equals($storage[onlyKey], _last$storage[onlyKey])
+                            }
+                          
+                            if (changed) {
+                                var updateStorageValue = function(v, k) {
+                                    angular.isDefined(v) && '$' !== k[0] && webStorage.setItem('ngStorage-' + k, angular.toJson(v));
+                                    delete _last$storage[k];
                                 }
-
-                                _last$storage = angular.copy($storage);
+                                if(singleItem) {
+                                    updateStorageValue($storage[onlyKey], onlyKey)
+                                    _last$storage[onlyKey] = angular.copy($storage[onlyKey]);
+                                }
+                                else {
+                                    angular.forEach($storage, updateStorageValue);
+                                    
+                                    // remove garbage from cache
+                                    for (var k in _last$storage) {
+                                        if($storage[k] == null) {
+                                            webStorage.removeItem('ngStorage-' + k);
+                                        }
+                                    }
+                                    
+                                    _last$storage = angular.copy($storage);
+                                }   
                             }
                         }
                     },
